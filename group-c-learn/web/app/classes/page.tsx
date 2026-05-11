@@ -1,26 +1,76 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 
 import { ClassCard } from "@/components/ClassCard";
-import { CLASSES, MENTORS } from "@/lib/mock-data";
+import {
+  fetchClasses,
+  fetchSkills,
+  buildSkillMap,
+  resolveSkills,
+  formatLabel,
+  computePrice,
+  type ApiClassItem,
+} from "@/lib/api";
 
 const ALL_FORMATS = ["Physique", "Virtuel", "Hybride"] as const;
 
+interface DisplayClass {
+  slug: string;
+  title: string;
+  mentorName: string;
+  format: string;
+  totalHours: number;
+  skills: string[];
+  priceEur: number;
+  photo?: string;
+}
+
+function toDisplay(c: ApiClassItem, skillMap: Map<string, string>): DisplayClass {
+  return {
+    slug: c.slug ?? c.id,
+    title: c.title,
+    mentorName: c.mentor_display_name,
+    format: formatLabel(c.format_envisaged),
+    totalHours: c.total_hours,
+    skills: resolveSkills(c.skills_taught, skillMap),
+    priceEur: computePrice(c.recommended_price_per_hour_collective_cents, c.total_hours),
+    photo: c.mentor_avatar_url ?? undefined,
+  };
+}
+
 export default function CataloguePage() {
+  const [classes, setClasses] = useState<DisplayClass[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [skillFilter, setSkillFilter] = useState<string[]>([]);
   const [formatFilter, setFormatFilter] = useState<string[]>([]);
-  const [maxPrice, setMaxPrice] = useState(200);
+  const [maxPrice, setMaxPrice] = useState(500);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    Promise.all([fetchClasses(), fetchSkills()])
+      .then(([classData, skillData]) => {
+        const map = buildSkillMap(skillData.items);
+        setClasses(classData.items.map((c) => toDisplay(c, map)));
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const allSkills = useMemo(() => {
     const set = new Set<string>();
-    CLASSES.forEach((c) => c.skills.forEach((s) => set.add(s)));
+    classes.forEach((c) => c.skills.forEach((s) => set.add(s)));
     return [...set];
-  }, []);
+  }, [classes]);
 
-  const filtered = CLASSES.filter((c) => {
+  const maxPossiblePrice = useMemo(() => {
+    if (classes.length === 0) return 500;
+    return Math.max(...classes.map((c) => c.priceEur), 500);
+  }, [classes]);
+
+  const filtered = classes.filter((c) => {
     if (skillFilter.length && !skillFilter.some((s) => c.skills.includes(s))) return false;
     if (formatFilter.length && !formatFilter.includes(c.format)) return false;
     if (c.priceEur > maxPrice) return false;
@@ -36,11 +86,11 @@ export default function CataloguePage() {
   function reset() {
     setSkillFilter([]);
     setFormatFilter([]);
-    setMaxPrice(200);
+    setMaxPrice(maxPossiblePrice);
     setFiltersOpen(false);
   }
 
-  const activeFilters = skillFilter.length + formatFilter.length + (maxPrice < 200 ? 1 : 0);
+  const activeFilters = skillFilter.length + formatFilter.length + (maxPrice < maxPossiblePrice ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,17 +117,17 @@ export default function CataloguePage() {
           Catalogue
         </p>
         <h1 className="font-serif text-3xl font-bold leading-tight text-foreground md:text-5xl">
-          {CLASSES.length} Mira Classes,{" "}
+          {loading ? "..." : classes.length} Mira Classes,{" "}
           <span className="italic text-primary">animées par des mentors validés.</span>
         </h1>
         <p className="mt-3 max-w-xl text-sm text-muted-foreground md:mt-4 md:text-base">
-          Filtres par skill, catégorie, format. Chaque class est conçue avec un livrable concret à la sortie.
+          Filtres par skill, format. Chaque class est conçue avec un livrable concret à la sortie.
         </p>
       </section>
 
-      {/* Barre de filtres sticky — desktop */}
+      {/* Filtres sticky — desktop */}
       <div className="sticky top-[53px] z-10 border-b border-border bg-background md:top-[57px]">
-        {/* Desktop : une ligne compacte */}
+        {/* Desktop */}
         <div className="mx-auto hidden max-w-6xl flex-wrap items-center gap-3 px-6 py-3 md:flex">
           <div className="flex flex-wrap gap-2">
             {allSkills.map((s) => (
@@ -94,7 +144,7 @@ export default function CataloguePage() {
               </button>
             ))}
           </div>
-          <div className="h-4 w-px bg-border" />
+          {allSkills.length > 0 && <div className="h-4 w-px bg-border" />}
           <div className="flex gap-2">
             {ALL_FORMATS.map((f) => (
               <button
@@ -116,8 +166,8 @@ export default function CataloguePage() {
             <input
               type="range"
               min={0}
-              max={200}
-              step={5}
+              max={maxPossiblePrice}
+              step={10}
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               className="w-20 accent-primary"
@@ -134,7 +184,7 @@ export default function CataloguePage() {
           </span>
         </div>
 
-        {/* Mobile : barre condensée + panel dépliable */}
+        {/* Mobile */}
         <div className="md:hidden">
           <div className="flex items-center justify-between px-4 py-3">
             <button
@@ -158,8 +208,7 @@ export default function CataloguePage() {
           </div>
 
           {filtersOpen && (
-            <div className="border-t border-border px-4 py-4 space-y-4">
-              {/* Skills */}
+            <div className="space-y-4 border-t border-border px-4 py-4">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Skills</p>
                 <div className="flex flex-wrap gap-2">
@@ -178,8 +227,6 @@ export default function CataloguePage() {
                   ))}
                 </div>
               </div>
-
-              {/* Format */}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Format</p>
                 <div className="flex gap-2">
@@ -198,8 +245,6 @@ export default function CataloguePage() {
                   ))}
                 </div>
               </div>
-
-              {/* Prix */}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Prix max : <span className="font-bold text-foreground">{maxPrice} €</span>
@@ -207,14 +252,13 @@ export default function CataloguePage() {
                 <input
                   type="range"
                   min={0}
-                  max={200}
-                  step={5}
+                  max={maxPossiblePrice}
+                  step={10}
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value))}
                   className="w-full accent-primary"
                 />
               </div>
-
               <div className="flex items-center justify-between pt-1">
                 <button onClick={reset} className="text-xs font-semibold text-primary">
                   Réinitialiser
@@ -233,7 +277,11 @@ export default function CataloguePage() {
 
       {/* Grille */}
       <section className="mx-auto max-w-6xl px-4 py-6 pb-20 md:px-6 md:py-10 md:pb-24">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="py-20 text-center text-muted-foreground">
+            <p className="text-sm">Chargement des classes...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="py-16 text-center text-muted-foreground md:py-20">
             <p className="text-base">Pas de class qui matche. Élargis tes filtres.</p>
             <button onClick={reset} className="mt-4 text-sm font-semibold text-primary hover:opacity-70">
@@ -247,9 +295,9 @@ export default function CataloguePage() {
                 key={c.slug}
                 slug={c.slug}
                 title={c.title}
-                mentorName={MENTORS[c.mentorId]?.name ?? c.mentorId}
+                mentorName={c.mentorName}
                 format={c.format}
-                durationWeeks={c.durationWeeks}
+                durationWeeks={Math.round(c.totalHours / 3)}
                 skills={c.skills}
                 priceEur={c.priceEur}
                 photo={c.photo}
