@@ -1,5 +1,5 @@
 """
-Auth middleware : valide JWT Supabase via JWKS (RS256), extrait user_id + role.
+Auth middleware : valide JWT Supabase via JWKS (asymétrique : RS256 / ES256, etc.).
 
 MIGRATION HINT (post-hackathon) :
     En production Hello Mira, ce module est **complètement supprimé**.
@@ -25,6 +25,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md` section "Auth custom JWT → edge-gateway scopes".
 """
+
 import logging
 from typing import Any, Literal
 
@@ -51,15 +52,20 @@ async def _fetch_jwks() -> dict[str, Any]:
         return _jwks_cache
 
     url = settings.supabase_jwks_url()
+    # WHY : Supabase exige souvent les clés projet sur les endpoints /auth/v1/* (dont JWKS).
+    headers = {
+        "apikey": settings.SUPABASE_ANON_KEY,
+        "Authorization": f"Bearer {settings.SUPABASE_ANON_KEY}",
+    }
     async with httpx.AsyncClient(timeout=5.0) as client:
-        response = await client.get(url)
+        response = await client.get(url, headers=headers)
         response.raise_for_status()
         _jwks_cache = response.json()
         return _jwks_cache
 
 
 async def _decode_jwt(token: str) -> dict[str, Any]:
-    """Décode + valide un JWT Supabase via JWKS RS256."""
+    """Décode + valide un JWT Supabase via JWKS (clés asymétriques)."""
     try:
         jwks = await _fetch_jwks()
     except httpx.HTTPError as exc:
@@ -79,10 +85,11 @@ async def _decode_jwt(token: str) -> dict[str, Any]:
         if not key:
             raise JWTError("Signing key not found in JWKS")
 
+        # Supabase (signing keys 2025+) émet souvent ES256 ; anciens projets RS256
         return jwt.decode(
             token,
             key=key,
-            algorithms=["RS256"],
+            algorithms=["RS256", "ES256", "ES384", "ES512"],
             audience="authenticated",
             options={"verify_aud": True},
         )
@@ -116,7 +123,9 @@ class AuthenticatedUser:
         return f"AuthenticatedUser(user_id={self.user_id!r}, role={self.role!r})"
 
 
-async def require_auth(authorization: str = Header(...)) -> AuthenticatedUser:
+async def require_auth(
+    authorization: str | None = Header(default=None),
+) -> AuthenticatedUser:
     """FastAPI dependency : extrait user authentifié du header Authorization.
 
     Usage :
@@ -124,25 +133,36 @@ async def require_auth(authorization: str = Header(...)) -> AuthenticatedUser:
         async def get_me(user: AuthenticatedUser = Depends(require_auth)):
             return user
     """
+    if authorization is None or not authorization.strip():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Authorization header",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     if not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or invalid Authorization header",
         )
 
-    token = authorization[len("Bearer "):]
+    token = authorization[len("Bearer ") :]
     payload = await _decode_jwt(token)
 
     user_id = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token: no sub claim")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token: no sub claim",
+        )
 
     email = payload.get("email")
     user_metadata = payload.get("user_metadata", {}) or {}
     role = user_metadata.get("role", "nomad")
 
     if role not in ("nomad", "mentor", "admin"):
-        logger.warning("Unknown role %r in JWT for user %s, defaulting to nomad", role, user_id)
+        logger.warning(
+            "Unknown role %r in JWT for user %s, defaulting to nomad", role, user_id
+        )
         role = "nomad"
 
     return AuthenticatedUser(user_id=user_id, email=email, role=role)
@@ -168,7 +188,9 @@ def require_role(*allowed_roles: UserRole):
             ...
     """
 
-    async def _check(user: AuthenticatedUser = __import__("fastapi").Depends(require_auth)) -> AuthenticatedUser:
+    async def _check(
+        user: AuthenticatedUser = __import__("fastapi").Depends(require_auth),
+    ) -> AuthenticatedUser:
         if user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

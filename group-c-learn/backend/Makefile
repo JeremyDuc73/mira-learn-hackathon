@@ -6,7 +6,7 @@ help:
 	@echo "Commandes disponibles :"
 	@echo "  make install         - installe les dépendances Python (.venv)"
 	@echo "  make dev             - démarre l'API en mode dev (reload auto, port 8000)"
-	@echo "  make test            - lance les tests pytest"
+	@echo "  make test            - réservé / pas de suite pytest actuellement"
 	@echo "  make lint            - vérifie le code avec ruff + mypy"
 	@echo "  make format          - formate le code avec ruff"
 	@echo "  make migrate         - applique les migrations DB (alembic upgrade head)"
@@ -19,15 +19,16 @@ dev:
 	uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 test:
-	pytest
+	@echo "Aucune suite pytest (dossier tests/ vide)."
+	@exit 0
 
 lint:
-	ruff check app tests
+	ruff check app
 	mypy app
 
 format:
-	ruff format app tests
-	ruff check --fix app tests
+	ruff format app
+	ruff check --fix app
 
 migrate:
 	alembic upgrade head

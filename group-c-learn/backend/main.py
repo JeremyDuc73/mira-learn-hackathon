@@ -17,6 +17,7 @@ MIGRATION HINT (post-hackathon, backbone Hello Mira) :
         app = microservice.app
         app.include_router(v1_router.router)
 """
+
 import logging
 
 from fastapi import FastAPI, Request
@@ -24,6 +25,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.v1.router import router as v1_router
+from app.api.v1.endpoints.student_cv_imports import (
+    internal_router as internal_cv_router,
+)
 from app.core.config import settings
 from app.core.db import close_db, init_db
 from app.core.exceptions import AppException
@@ -57,7 +61,9 @@ def create_app() -> FastAPI:
 
     # Exception handler global (réponses JSend)
     @app.exception_handler(AppException)
-    async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+    async def app_exception_handler(
+        request: Request, exc: AppException
+    ) -> JSONResponse:
         return JSONResponse(
             status_code=exc.status_code,
             content=error_response(message=exc.message, data=exc.data),
@@ -76,6 +82,7 @@ def create_app() -> FastAPI:
 
     # Routes
     app.include_router(v1_router, prefix="/v1")
+    app.include_router(internal_cv_router)
 
     return app
 

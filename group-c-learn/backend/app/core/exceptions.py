@@ -10,6 +10,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md`.
 """
+
 from typing import Any
 
 

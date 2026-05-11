@@ -10,6 +10,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md` section "Database session → ms-common-api".
 """
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (

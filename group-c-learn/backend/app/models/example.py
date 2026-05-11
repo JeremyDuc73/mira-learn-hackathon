@@ -15,6 +15,7 @@ Pour créer une nouvelle entité :
     7. Enregistrer la route dans `app/api/v1/router.py`
     8. Créer la migration : `make migrate-create msg="add_{entity}_table"`
 """
+
 from typing import Literal
 
 from sqlalchemy import CheckConstraint, Index, String, Text

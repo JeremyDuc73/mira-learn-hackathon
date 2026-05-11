@@ -16,6 +16,7 @@ MIGRATION HINT (post-hackathon) :
     pour générer automatiquement Create/Update/Read depuis un schéma Base, mais
     on peut garder le pattern explicite (plus lisible).
 """
+
 from datetime import datetime
 from typing import Literal, Optional
 

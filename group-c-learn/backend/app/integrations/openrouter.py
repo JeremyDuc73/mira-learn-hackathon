@@ -67,6 +67,7 @@ LLM wrapper via OpenRouter — 1 seul fichier pour ISOLER toute la logique IA.
     Le `MIGRATION_GUIDE.md` documente vers quel service backbone chaque use
     case migrera post-hackathon.
 """
+
 from __future__ import annotations
 
 import logging
