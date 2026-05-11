@@ -48,17 +48,20 @@ export default function AuthenticatedLayout({
 
   return (
     <>
-      <header className="border-b border-gray-200 bg-white">
+      <header className="sticky top-0 z-10 border-b border-border bg-background">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="font-semibold">
+          <Link href="/" className="font-serif text-xl font-bold text-primary">
             Mira Learn
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/me" className="text-sm hover:underline">
+            <Link href="/classes" className="text-sm text-foreground hover:text-primary">
+              Catalogue
+            </Link>
+            <Link href="/me" className="text-sm text-foreground hover:text-primary">
               Mon profil
             </Link>
-            <span className="text-sm text-gray-500">{user.email}</span>
-            <Button variant="outline" onClick={handleSignOut}>
+            <span className="text-sm text-muted-foreground">{user.email}</span>
+            <Button variant="secondary" onClick={handleSignOut}>
               Déconnexion
             </Button>
           </div>

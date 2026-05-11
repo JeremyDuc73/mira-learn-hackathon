@@ -21,18 +21,25 @@
   --color-secondary: #f3f4f6;
   --color-secondary-foreground: #1D1D1B;
   --color-muted: #f3f4f6;
-  --color-muted-foreground: #6b7280;
+  --color-muted-foreground: #888888;    /* muted Mira */
   --color-accent: #f3f4f6;
   --color-accent-foreground: #1D1D1B;
   --color-card: #ffffff;
   --color-card-foreground: #1D1D1B;
-  --color-border: #e5e7eb;
+  --color-border: #e5e7eb;              /* rule */
   --color-input: #e5e7eb;
   --color-ring: #E6332A;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
   --color-popover: #ffffff;
   --color-popover-foreground: #1D1D1B;
+
+  /* Palette Mira étendue */
+  --color-beige-deep: #E2DCD3;          /* hover surface, chips bg neutre */
+  --color-muted-soft: #B6B0A6;          /* bordures subtiles, séparateurs */
+  --color-success: #16A34A;             /* skill validée, étape completed */
+  --color-gold: #D4A853;                /* étoiles rating, badges premium */
+  --color-sage-soft: #D6E3D0;           /* chips skill primaire, étape in_progress */
 
   /* Polices Mira — chargées via next/font/google dans app/layout.tsx */
   --font-sans: var(--font-manrope, "Manrope"), ui-sans-serif, system-ui, sans-serif;

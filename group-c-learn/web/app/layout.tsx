@@ -29,7 +29,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Mira Learn — Hackathon",
+  title: "Mira Learn",
   description: "Plateforme d'apprentissage Hello Mira",
 };
 

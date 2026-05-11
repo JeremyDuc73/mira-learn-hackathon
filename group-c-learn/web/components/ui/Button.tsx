@@ -15,17 +15,17 @@ import { cn } from "@/lib/utils";
  *
  *   Ce fichier (`components/ui/Button.tsx`) sera supprimé post-migration.
  */
-type ButtonVariant = "primary" | "outline" | "ghost" | "destructive";
+type ButtonVariant = "primary" | "secondary" | "ghost" | "destructive";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
 }
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--primary)] text-white hover:opacity-90",
-  outline: "border border-gray-300 bg-white hover:bg-gray-50",
-  ghost: "hover:bg-gray-100",
-  destructive: "bg-red-600 text-white hover:bg-red-700",
+  primary: "bg-primary text-primary-foreground hover:opacity-90",
+  secondary: "border border-border bg-card text-foreground hover:bg-beige-deep",
+  ghost: "text-primary hover:bg-beige-deep",
+  destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -37,8 +37,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ref={ref}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary)]",
+        "inline-flex min-h-[44px] items-center justify-center rounded-lg px-5 text-sm font-medium transition-colors",
+        "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary",
         "disabled:cursor-not-allowed disabled:opacity-50",
         VARIANT_CLASSES[variant],
         className,
