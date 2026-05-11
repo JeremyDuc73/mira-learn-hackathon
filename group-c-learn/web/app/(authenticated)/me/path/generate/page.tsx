@@ -9,8 +9,10 @@ import { SkillChip } from "@/components/SkillChip";
 
 const ALL_SKILLS = [
   "Pitch investor", "Funding strategy", "UI Design", "Design System",
-  "Growth", "B2B", "Go-to-market", "Public speaking",
+  "Growth", "B2B", "Go-to-market", "Public speaking", "Figma",
 ];
+
+const CV_EXTRACTED_SKILLS = ["UI Design", "Figma", "Public speaking"];
 
 const HORIZONS = [
   { id: "3_months", label: "3 mois", desc: "Sprint focus" },
@@ -56,12 +58,10 @@ function GeneratingState() {
   return (
     <div className="flex min-h-[calc(100vh-73px)] flex-col items-center justify-center px-6 py-16">
       <div className="flex flex-col items-center gap-12 max-w-lg w-full">
-        {/* Icône animée */}
+        {/* Spinner */}
         <div className="relative flex h-24 w-24 items-center justify-center">
-          <div className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
-          <div className="relative flex h-12 w-12 animate-spin items-center justify-center rounded-full bg-primary text-primary-foreground">
-            ✨
-          </div>
+          <div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-border border-t-primary" />
         </div>
 
         {/* Texte rotatif */}
@@ -108,6 +108,8 @@ export default function PathGeneratePage() {
   const [horizon, setHorizon] = useState<"3_months" | "6_months" | "1_year">("6_months");
   const [budget, setBudget] = useState(80);
   const [cvName, setCvName] = useState<string | null>(null);
+  const [cvParsing, setCvParsing] = useState(false);
+  const [cvExtracted, setCvExtracted] = useState<string[]>([]);
   const [adding, setAdding] = useState(false);
   const [generating, setGenerating] = useState(false);
 
@@ -127,7 +129,7 @@ export default function PathGeneratePage() {
       </Link>
 
       <p className="mb-3 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-primary">
-        ✨ Mira AI
+        Mira AI
       </p>
       <h1 className="font-serif text-4xl font-bold leading-tight text-foreground">
         Génère ton parcours{" "}
@@ -219,13 +221,37 @@ export default function PathGeneratePage() {
         <div>
           <h2 className="mb-1 text-base font-semibold text-foreground">Ton CV (optionnel)</h2>
           <p className="mb-3 text-sm text-muted-foreground">On identifiera tes skills déjà acquises pour ne pas te les reproposer.</p>
-          {cvName ? (
+
+          {cvParsing ? (
             <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-sage-soft text-success">✓</div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">{cvName}</p>
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-beige-deep">
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-border border-t-primary" />
               </div>
-              <button onClick={() => setCvName(null)} className="text-muted-foreground hover:text-primary">×</button>
+              <div>
+                <p className="text-sm font-semibold text-foreground">{cvName}</p>
+                <p className="text-xs text-muted-foreground">Analyse en cours…</p>
+              </div>
+            </div>
+          ) : cvExtracted.length > 0 ? (
+            <div className="rounded-xl border border-border bg-card p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-sage-soft text-success text-sm font-bold">ok</div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{cvName}</p>
+                    <p className="text-xs text-muted-foreground">{cvExtracted.length} skills détectées</p>
+                  </div>
+                </div>
+                <button onClick={() => { setCvName(null); setCvExtracted([]); }} className="text-muted-foreground hover:text-primary">×</button>
+              </div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Déjà acquises (exclues du parcours)</p>
+              <div className="flex flex-wrap gap-1.5">
+                {cvExtracted.map((s) => (
+                  <span key={s} className="rounded-full bg-sage-soft px-3 py-1 text-xs font-medium text-foreground">
+                    {s}
+                  </span>
+                ))}
+              </div>
             </div>
           ) : (
             <label className="flex cursor-pointer items-center gap-5 rounded-xl border border-dashed border-muted-soft bg-card p-6 hover:border-primary">
@@ -233,10 +259,18 @@ export default function PathGeneratePage() {
                 type="file"
                 accept=".pdf"
                 className="hidden"
-                onChange={() => setCvName("CV.pdf")}
+                onChange={(e) => {
+                  const name = e.target.files?.[0]?.name ?? "CV.pdf";
+                  setCvName(name);
+                  setCvParsing(true);
+                  setTimeout(() => {
+                    setCvParsing(false);
+                    setCvExtracted(CV_EXTRACTED_SKILLS);
+                  }, 2200);
+                }}
               />
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-background text-muted-foreground">
-                ↑
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-background text-xs font-semibold text-muted-foreground">
+                PDF
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground">Glisse ton CV ici ou clique pour parcourir</p>
@@ -254,7 +288,7 @@ export default function PathGeneratePage() {
           onClick={() => setGenerating(true)}
           className="min-w-[280px] py-4 text-base"
         >
-          ✨ Générer mon parcours
+          Générer mon parcours
         </Button>
         <p className="text-xs text-muted-foreground">~15 secondes · gratuit</p>
       </div>

@@ -11,6 +11,7 @@ interface ClassCardProps {
   durationWeeks: number;
   skills: readonly string[];
   priceEur: number;
+  photo?: string;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export function ClassCard({
   durationWeeks,
   skills,
   priceEur,
+  photo,
   className,
 }: ClassCardProps) {
   return (
@@ -31,7 +33,12 @@ export function ClassCard({
         className,
       )}
     >
-      <div className="aspect-video bg-beige-deep" />
+      <div className="aspect-video overflow-hidden bg-beige-deep">
+        {photo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photo} alt={title} className="h-full w-full object-cover" />
+        )}
+      </div>
 
       <div className="flex flex-1 flex-col gap-3 p-6">
         <h3 className="text-base font-semibold leading-snug text-foreground">

@@ -30,6 +30,7 @@ export const MENTORS: Record<string, MiraMentor> = {
 export const CLASSES: MiraClass[] = [
   {
     slug: "pitcher-pour-lever-500k",
+    photo: "https://picsum.photos/seed/pitch-investor/800/450",
     title: "Pitcher pour lever 500k €",
     subtitle: "Construis ton deck investor + délivre ton pitch en 6 semaines",
     description:
@@ -70,6 +71,7 @@ export const CLASSES: MiraClass[] = [
   },
   {
     slug: "ui-design-saas-b2b",
+    photo: "https://picsum.photos/seed/ui-design-saas/800/450",
     title: "UI Design pour SaaS B2B",
     subtitle: "Maîtrise les patterns de l'interface SaaS moderne en 4 semaines",
     description:
@@ -101,6 +103,7 @@ export const CLASSES: MiraClass[] = [
   },
   {
     slug: "growth-b2b-go-to-market",
+    photo: "https://picsum.photos/seed/growth-b2b/800/450",
     title: "Growth B2B go-to-market",
     subtitle: "Lance ton SaaS B2B en 8 semaines avec une vraie stratégie GTM",
     description:

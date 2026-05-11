@@ -46,8 +46,8 @@ export default function ApplyPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6">
         <div className="max-w-lg text-center">
-          <div className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-full bg-sage-soft text-success">
-            <span className="text-4xl">✓</span>
+          <div className="mx-auto mb-7 flex h-20 w-20 items-center justify-center rounded-full bg-sage-soft">
+            <div className="h-6 w-6 rounded-full border-2 border-success bg-success" />
           </div>
           <h2 className="font-serif text-3xl font-bold leading-tight text-foreground">
             Candidature envoyée à{" "}
@@ -116,7 +116,7 @@ export default function ApplyPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-foreground">
-                      {s.mode === "physical" ? "📍" : "🌐"} {s.location}
+                      {s.location}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {s.dates} · {s.seats - s.enrolled} places dispo
@@ -161,7 +161,7 @@ export default function ApplyPage() {
             />
             <div className="mt-2 flex justify-between text-xs text-muted-foreground">
               <span>
-                {goalValid ? "✓ ton objectif est clair" : goal.length < 50 ? `${50 - goal.length} caractères minimum restants` : ""}
+                {goalValid ? "Objectif clair" : goal.length < 50 ? `${50 - goal.length} caractères minimum restants` : ""}
               </span>
               <span className={goal.length > 480 ? "text-destructive" : ""}>{goal.length}/500</span>
             </div>
@@ -180,7 +180,7 @@ export default function ApplyPage() {
                   }`}
                 >
                   <div className={`flex h-4.5 w-4.5 items-center justify-center rounded border-2 ${avail[o.id] ? "border-primary bg-primary" : "border-border"}`}>
-                    {avail[o.id] && <span className="text-[10px] text-white">✓</span>}
+                    {avail[o.id] && <div className="h-2 w-2 rounded-full bg-white" />}
                   </div>
                   {o.label}
                   <input

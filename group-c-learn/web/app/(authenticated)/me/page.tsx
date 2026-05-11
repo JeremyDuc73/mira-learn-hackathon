@@ -15,7 +15,36 @@ const MOCK_ENROLMENTS = [
   { classSlug: "pitcher-pour-lever-500k", title: "Pitcher pour lever 500k €", mentor: "Antoine Martin", when: "il y a 2 j" },
 ];
 
+const COUNTRIES = [
+  "Portugal", "France", "Espagne", "Allemagne", "Royaume-Uni", "Brésil",
+  "Etats-Unis", "Mexique", "Thaïlande", "Japon", "Australie", "Autre",
+];
+
+interface ProfileState {
+  display_name: string;
+  headline: string;
+  bio: string;
+  current_country: string;
+  city: string;
+  flag: string;
+  since: string;
+}
+
+const INITIAL_PROFILE: ProfileState = {
+  display_name: "Anna Lopez",
+  headline: "Nomad designer en transition vers le SaaS",
+  bio: "Je construis des interfaces produit depuis 4 ans. Aujourd'hui je veux apprendre à pitcher et à structurer mon financement pour lancer mon propre SaaS.",
+  current_country: "Portugal",
+  city: "Lisbonne",
+  flag: "🇵🇹",
+  since: "2021",
+};
+
 export default function MePage() {
+  const [profile, setProfile] = useState<ProfileState>(INITIAL_PROFILE);
+  const [editDraft, setEditDraft] = useState<ProfileState>(INITIAL_PROFILE);
+  const [editing, setEditing] = useState(false);
+
   const [targetSkills, setTargetSkills] = useState(["Pitch investor", "Funding strategy"]);
   const [visibility, setVisibility] = useState<"public" | "private">("public");
   const [adding, setAdding] = useState(false);
@@ -31,6 +60,16 @@ export default function MePage() {
     setAdding(false);
   }
 
+  function saveProfile() {
+    setProfile(editDraft);
+    setEditing(false);
+  }
+
+  function cancelEdit() {
+    setEditDraft(profile);
+    setEditing(false);
+  }
+
   return (
     <div className="flex gap-12">
       {/* Sidebar */}
@@ -39,7 +78,7 @@ export default function MePage() {
           {[
             { href: "/me", label: "Mon profil" },
             { href: "/me/path", label: "Mon parcours" },
-            { href: "/me/path/generate", label: "✨ Générer" },
+            { href: "/me/path/generate", label: "Générer" },
           ].map((item) => (
             <li key={item.href}>
               <Link
@@ -56,24 +95,107 @@ export default function MePage() {
       {/* Contenu */}
       <div className="flex flex-1 flex-col gap-10 min-w-0">
         {/* Header profil */}
-        <header className="flex items-center gap-6">
-          <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full bg-beige-deep font-bold text-xl text-foreground">
-            AL
-          </div>
-          <div className="flex-1">
-            <h1 className="font-serif text-3xl font-bold text-foreground">Anna Lopez</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Nomad designer en transition vers le SaaS</p>
-            <p className="mt-1 text-sm text-muted-foreground">🇵🇹 Lisbonne, PT · nomade depuis 2021</p>
-          </div>
-          <Button variant="secondary">Modifier le profil</Button>
-        </header>
+        {editing ? (
+          <section className="rounded-2xl border border-border bg-card p-6">
+            <h2 className="mb-6 text-lg font-semibold text-foreground">Modifier le profil</h2>
+            <div className="space-y-5">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Nom affiché</label>
+                <input
+                  type="text"
+                  value={editDraft.display_name}
+                  onChange={(e) => setEditDraft((d) => ({ ...d, display_name: e.target.value }))}
+                  className="min-h-[44px] w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-2 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Titre (headline)</label>
+                <input
+                  type="text"
+                  value={editDraft.headline}
+                  onChange={(e) => setEditDraft((d) => ({ ...d, headline: e.target.value }))}
+                  placeholder="Ex : Nomad designer en transition vers le SaaS"
+                  className="w-full rounded-xl border-2 border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Bio</label>
+                <textarea
+                  value={editDraft.bio}
+                  onChange={(e) => setEditDraft((d) => ({ ...d, bio: e.target.value }))}
+                  rows={4}
+                  placeholder="Décris ton parcours et tes objectifs en quelques lignes."
+                  className="w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-2 focus:border-primary"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Pays actuel</label>
+                  <select
+                    value={editDraft.current_country}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, current_country: e.target.value }))}
+                    className="min-h-[44px] w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-2 focus:border-primary"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">Ville</label>
+                  <input
+                    type="text"
+                    value={editDraft.city}
+                    onChange={(e) => setEditDraft((d) => ({ ...d, city: e.target.value }))}
+                    className="min-h-[44px] w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-2 focus:border-primary"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">Nomade depuis (année)</label>
+                <input
+                  type="text"
+                  value={editDraft.since}
+                  onChange={(e) => setEditDraft((d) => ({ ...d, since: e.target.value }))}
+                  placeholder="2021"
+                  className="min-h-[44px] w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm text-foreground outline-none focus:border-2 focus:border-primary"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <Button variant="primary" onClick={saveProfile}>Enregistrer</Button>
+              <Button variant="ghost" onClick={cancelEdit}>Annuler</Button>
+            </div>
+          </section>
+        ) : (
+          <header className="flex items-start gap-6">
+            <div className="flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-full bg-beige-deep font-bold text-xl text-foreground">
+              {profile.display_name.slice(0, 2).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-serif text-3xl font-bold text-foreground">{profile.display_name}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{profile.headline}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {profile.city}, {profile.current_country} · nomade depuis {profile.since}
+              </p>
+              {profile.bio && (
+                <p className="mt-3 max-w-lg text-sm leading-relaxed text-foreground">{profile.bio}</p>
+              )}
+            </div>
+            <Button variant="secondary" onClick={() => { setEditDraft(profile); setEditing(true); }}>
+              Modifier le profil
+            </Button>
+          </header>
+        )}
 
         {/* Skills cibles */}
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">Mes skills cibles</h2>
           {targetSkills.length === 0 ? (
             <div className="flex items-center gap-4 rounded-xl border border-dashed border-muted-soft bg-card p-5">
-              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-background text-primary">✨</div>
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-background">
+                <span className="h-4 w-4 rounded-full border-2 border-primary" />
+              </div>
               <p className="flex-1 text-sm text-foreground">Définis tes skills cibles pour qu'on te génère ton parcours d'apprentissage.</p>
               <Link href="/me/path/generate"><Button variant="primary" className="text-sm">Définir mes skills →</Button></Link>
             </div>
@@ -110,8 +232,8 @@ export default function MePage() {
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">Mes skills validées</h2>
           <div className="flex items-center gap-4 rounded-xl border border-dashed border-muted-soft bg-card p-5">
-            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-background text-success">✓</div>
-            <p className="text-sm text-foreground">Passe des QCM pour valider tes skills sur l'app mobile. Ça apparaît ici.</p>
+            <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-sage-soft text-sm font-bold text-success">ok</div>
+            <p className="text-sm text-foreground">Passe des QCM pour valider tes skills sur l'app mobile. Ca apparaît ici.</p>
           </div>
         </section>
 
@@ -151,7 +273,7 @@ export default function MePage() {
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">Mon parcours</h2>
           <div className="rounded-2xl bg-foreground p-8 text-primary-foreground">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-soft">✨ Mira AI</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-soft">Mira AI</p>
             <h3 className="font-serif text-2xl font-bold">
               Génère ton parcours{" "}
               <span className="italic text-primary">sur mesure.</span>
@@ -160,7 +282,7 @@ export default function MePage() {
               On t'aide à passer du point A au point B en 4 étapes max. Démarre quand tu veux, ~15 secondes pour générer.
             </p>
             <Link href="/me/path/generate" className="mt-6 inline-block">
-              <Button variant="primary">✨ Générer</Button>
+              <Button variant="primary">Générer</Button>
             </Link>
           </div>
         </section>
@@ -181,7 +303,10 @@ export default function MePage() {
                   href={`/classes/${e.classSlug}`}
                   className={`flex items-center gap-4 px-6 py-4 hover:bg-beige-deep ${i > 0 ? "border-t border-border" : ""}`}
                 >
-                  <div className="h-12 w-12 flex-shrink-0 rounded-lg bg-beige-deep" />
+                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-beige-deep">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="https://picsum.photos/seed/pitch-investor/48/48" alt="" className="h-full w-full object-cover" />
+                  </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{e.title}</p>
                     <p className="text-xs text-muted-foreground">par {e.mentor}</p>

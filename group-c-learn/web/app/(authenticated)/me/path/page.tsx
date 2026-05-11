@@ -26,8 +26,8 @@ const PATH_STEPS: PathStep[] = [
 function StepDot({ status }: { status: PathStep["status"] }) {
   if (status === "completed")
     return (
-      <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-success bg-card text-success">
-        ✓
+      <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-success bg-success">
+        <div className="h-2 w-2 rounded-full bg-card" />
       </div>
     );
   if (status === "in_progress")
@@ -37,8 +37,8 @@ function StepDot({ status }: { status: PathStep["status"] }) {
       </div>
     );
   return (
-    <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-muted-soft bg-card text-xs text-muted-soft">
-      🔒
+    <div className="relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 border-muted-soft bg-card">
+      <div className="h-2 w-2 rounded-full bg-muted-soft" />
     </div>
   );
 }
@@ -52,7 +52,7 @@ export default function PathPage() {
           {[
             { href: "/me", label: "Mon profil" },
             { href: "/me/path", label: "Mon parcours" },
-            { href: "/me/path/generate", label: "✨ Générer" },
+            { href: "/me/path/generate", label: "Générer" },
           ].map((item) => (
             <li key={item.href}>
               <Link
@@ -72,7 +72,7 @@ export default function PathPage() {
         <header className="mb-12 flex flex-wrap items-end justify-between gap-6">
           <div>
             <p className="mb-2 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-widest text-primary">
-              ✨ Généré par Mira AI
+              Généré par Mira AI
             </p>
             <h1 className="font-serif text-4xl font-bold text-foreground">Mon parcours.</h1>
             <p className="mt-3 text-base text-muted-foreground">
@@ -123,7 +123,7 @@ export default function PathPage() {
                     <span className="rounded-full bg-sage-soft px-3 py-0.5 text-xs font-medium text-foreground">En cours</span>
                   )}
                   {isLocked && (
-                    <span className="rounded-full border border-border px-3 py-0.5 text-xs text-muted-foreground">🔒 Verrouillée</span>
+                    <span className="rounded-full border border-border px-3 py-0.5 text-xs text-muted-foreground">Verrouillée</span>
                   )}
                 </div>
 
@@ -138,7 +138,12 @@ export default function PathPage() {
                 {/* Card class */}
                 {klass && mentor && (
                   <div className={`flex max-w-xl items-center gap-4 overflow-hidden rounded-xl border border-border p-4 ${isLocked ? "opacity-50" : "bg-card"}`}>
-                    <div className="h-16 w-24 flex-shrink-0 rounded-lg bg-beige-deep" />
+                    <div className="h-16 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-beige-deep">
+                      {klass.photo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={klass.photo} alt={klass.title} className="h-full w-full object-cover" />
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{klass.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -167,7 +172,7 @@ export default function PathPage() {
 
         {/* Footer IA */}
         <div className="mt-12 flex items-center gap-3 rounded-xl border border-border bg-card px-5 py-4 text-sm text-muted-foreground">
-          <span className="text-primary">✨</span>
+          <span className="h-2 w-2 rounded-full bg-primary inline-block" />
           Cette recommandation est issue de Mira AI · dernière mise à jour il y a 2 j.
           <Link href="/me/path/generate" className="ml-auto text-xs font-semibold text-primary hover:opacity-70">
             Donner du feedback

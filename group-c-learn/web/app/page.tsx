@@ -12,6 +12,7 @@ const FEATURED_CLASSES = [
     durationWeeks: 6,
     skills: ["Pitch investor", "Funding strategy"],
     priceEur: 80,
+    photo: "https://picsum.photos/seed/pitch-investor/800/450",
   },
   {
     slug: "ui-design-saas-b2b",
@@ -21,6 +22,7 @@ const FEATURED_CLASSES = [
     durationWeeks: 4,
     skills: ["UI Design"],
     priceEur: 60,
+    photo: "https://picsum.photos/seed/ui-design-saas/800/450",
   },
   {
     slug: "growth-b2b-go-to-market",
@@ -30,6 +32,7 @@ const FEATURED_CLASSES = [
     durationWeeks: 8,
     skills: ["Growth", "B2B"],
     priceEur: 49,
+    photo: "https://picsum.photos/seed/growth-b2b/800/450",
   },
 ] as const;
 
@@ -57,56 +60,109 @@ export default function Home() {
               Communauté
             </Link>
           </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link href="/login" className="hidden md:inline-flex">
               <Button variant="ghost">Se connecter</Button>
             </Link>
             <Link href="/classes">
-              <Button variant="primary">Découvrir les classes</Button>
+              <Button variant="primary">Découvrir</Button>
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 py-20 text-center">
-        <h1 className="font-serif text-5xl font-bold leading-tight text-foreground md:text-6xl">
+      <section className="mx-auto max-w-6xl px-6 py-12 text-center md:py-20">
+        <h1 className="font-serif text-4xl font-bold leading-tight text-foreground md:text-6xl">
           Apprends en voyageant.
           <br />
           <span className="text-primary">
             Avec des mentors qui ont fait le chemin.
           </span>
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+        <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
           Mira Learn t'aide à acquérir les skills dont tu as besoin auprès de
           mentors validés, en présentiel ou en virtuel.
         </p>
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
           <Link href="/classes">
-            <Button variant="primary" className="px-8 text-base">
+            <Button variant="primary" className="px-6 text-base md:px-8">
               Découvrir les classes
             </Button>
           </Link>
           <Link href="/login">
-            <Button variant="secondary" className="px-8 text-base">
+            <Button variant="secondary" className="px-6 text-base md:px-8">
               Devenir mentor
             </Button>
           </Link>
         </div>
 
-        {/* Photo hero placeholder */}
-        <div className="mt-12 aspect-video w-full rounded-xl bg-beige-deep" />
+        {/* Photo hero */}
+        <div className="mt-12 aspect-video w-full overflow-hidden rounded-2xl bg-beige-deep">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://picsum.photos/seed/mira-nomad-hero/1200/675"
+            alt="Digital nomads learning together"
+            className="h-full w-full object-cover"
+          />
+        </div>
       </section>
 
       {/* Classes featured */}
       <section className="mx-auto max-w-6xl px-6 pb-20">
-        <h2 className="mb-8 text-2xl font-bold text-foreground">
+        <h2 className="mb-8 font-serif text-2xl font-bold text-foreground md:text-3xl">
           Classes featured
         </h2>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
           {FEATURED_CLASSES.map((c) => (
             <ClassCard key={c.slug} {...c} />
           ))}
+        </div>
+      </section>
+
+      {/* Témoignages */}
+      <section className="bg-foreground py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <p className="mb-10 text-center text-xs font-semibold uppercase tracking-widest text-muted-soft">
+            Ils ont appris avec Mira
+          </p>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {[
+              {
+                quote: "En 6 semaines avec Antoine j'avais un deck solide. J'ai levé 600k deux mois plus tard.",
+                name: "Léa B.",
+                detail: "Founder SaaS · Berlin",
+                initials: "LB",
+              },
+              {
+                quote: "Le parcours IA m'a vraiment aidé à savoir par où commencer. J'avais du mal à prioriser mes skills.",
+                name: "Marco S.",
+                detail: "Designer · Sao Paulo",
+                initials: "MS",
+              },
+              {
+                quote: "La cohorte physique à Barcelone, c'était incroyable. Tu rencontres des gens qui ont exactement les memes défis.",
+                name: "Clara K.",
+                detail: "Consultant product · Prague",
+                initials: "CK",
+              },
+            ].map((t) => (
+              <div key={t.name} className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="flex-1 text-base leading-relaxed text-primary-foreground/80">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                    {t.initials}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-primary-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-soft">{t.detail}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

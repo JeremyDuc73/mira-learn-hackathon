@@ -41,6 +41,7 @@ export interface MiraSession {
 
 export interface MiraClass {
   slug: string;
+  photo?: string;
   title: string;
   subtitle: string;
   description: string;

@@ -17,7 +17,7 @@ export function SkillChip({ label, validated = false, removable = false, onRemov
         className,
       )}
     >
-      {validated && <span className="text-success">★</span>}
+      {validated && <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />}
       {label}
       {removable && (
         <button

@@ -67,7 +67,7 @@ export default function CataloguePage() {
 
       {/* Barre de filtres sticky */}
       <div className="sticky top-[57px] z-10 border-b border-border bg-background px-6 py-4">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 overflow-x-auto pb-1 md:flex-wrap md:pb-0">
           {/* Skills */}
           <div className="flex flex-wrap gap-2">
             {allSkills.map((s) => (
@@ -150,6 +150,7 @@ export default function CataloguePage() {
                 durationWeeks={c.durationWeeks}
                 skills={c.skills}
                 priceEur={c.priceEur}
+                photo={c.photo}
               />
             ))}
           </div>

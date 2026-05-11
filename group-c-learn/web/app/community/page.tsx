@@ -125,12 +125,12 @@ export default function CommunityPage() {
                       <p className="text-sm font-semibold text-foreground">{member.name}</p>
                       {member.completed && (
                         <span className="rounded-full bg-gold/20 px-2 py-0.5 text-[10px] font-medium text-gold">
-                          ★ Mira graduate
+                          Mira graduate
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {member.flag} {member.city} · {member.since}
+                      {member.city} · {member.since}
                     </p>
                   </div>
                 </div>

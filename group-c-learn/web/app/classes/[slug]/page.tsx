@@ -29,15 +29,19 @@ export default async function ClassDetailPage({ params }: Props) {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
+      <section className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-12">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center md:gap-12">
           {/* Photo */}
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-beige-deep">
+            {klass.photo && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={klass.photo} alt={klass.title} className="h-full w-full object-cover" />
+            )}
             <div className="absolute left-4 top-4 flex gap-2">
-              <span className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-foreground">
+              <span className="rounded-full bg-card/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
                 {klass.format}
               </span>
-              <span className="rounded-full bg-card px-3 py-1 text-xs font-semibold text-foreground">
+              <span className="rounded-full bg-card/90 px-3 py-1 text-xs font-semibold text-foreground backdrop-blur-sm">
                 {klass.durationWeeks} sem.
               </span>
             </div>
@@ -63,7 +67,7 @@ export default async function ClassDetailPage({ params }: Props) {
               <div className="h-8 w-px bg-border" />
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  ★ {klass.rating} ({klass.reviews} avis)
+                  {klass.rating}/5 ({klass.reviews} avis)
                 </p>
                 <p className="text-xs text-muted-foreground">par cohorte de {klass.cohortSize}</p>
               </div>
@@ -90,7 +94,7 @@ export default async function ClassDetailPage({ params }: Props) {
               <h3 className="text-lg font-semibold text-foreground">{mentor.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{mentor.headline}</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                ★ {mentor.rating} ({mentor.reviews} avis) · {mentor.classCount} Mira Classes
+                {mentor.rating}/5 ({mentor.reviews} avis) · {mentor.classCount} Mira Classes
               </p>
             </div>
           </div>
@@ -156,7 +160,9 @@ export default async function ClassDetailPage({ params }: Props) {
             {klass.sessions.map((s) => (
               <div key={s.id} className="rounded-xl border border-border bg-card p-6">
                 <div className="mb-3 flex items-center gap-2 font-semibold text-foreground">
-                  <span>{s.mode === "physical" ? "📍" : "🌐"}</span>
+                  <span className="rounded bg-beige-deep px-2 py-0.5 text-xs font-medium text-foreground">
+                    {s.mode === "physical" ? "Physique" : "Virtuel"}
+                  </span>
                   <span>{s.location}</span>
                 </div>
                 <p className="mb-4 text-sm text-muted-foreground">
