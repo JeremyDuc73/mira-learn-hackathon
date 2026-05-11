@@ -92,14 +92,54 @@ CREATE INDEX idx_mentor_profile_status ON mentor_profile (status) WHERE deleted_
 CREATE INDEX idx_mentor_profile_rating ON mentor_profile (aggregate_rating DESC NULLS LAST) WHERE deleted_at IS NULL;
 CREATE INDEX idx_mentor_profile_classes_count ON mentor_profile (classes_given_count DESC) WHERE deleted_at IS NULL;
 
+CREATE TABLE student_profile (
+    id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE,                          -- ref Supabase auth.users.id
+
+    -- Identité
+    display_name VARCHAR(120) NOT NULL,
+    headline VARCHAR(255) NOT NULL DEFAULT '',             -- bio courte affichée en cohort
+    bio TEXT NOT NULL DEFAULT '',                          -- markdown
+    avatar_url VARCHAR(500) NULL,
+
+    -- Parcours
+    professional_journey JSONB NOT NULL DEFAULT '[]'::jsonb,
+        -- même schéma que mentor_profile.professional_journey
+
+    -- Liens sociaux (optionnels)
+    linkedin_url VARCHAR(255) NULL,
+    twitter_url VARCHAR(255) NULL,
+    website_url VARCHAR(255) NULL,
+
+    -- Objectifs apprentissage
+    target_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
+        -- Schéma : [skill_id, skill_id, ...]
+    learning_horizon VARCHAR(16) NULL CHECK (learning_horizon IS NULL OR learning_horizon IN (
+        '3_months', '6_months', '1_year', '2_years'
+    )),
+    motivation TEXT NOT NULL DEFAULT '',                   -- "Pourquoi tu veux apprendre ?", utilisé par IA pour personnaliser parcours
+
+    -- Préférences
+    preferred_formats JSONB NOT NULL DEFAULT '[]'::jsonb,
+        -- ['physical', 'virtual', 'both']
+    preferred_destinations JSONB NOT NULL DEFAULT '[]'::jsonb,
+        -- ['Barcelona', 'Lisbon', 'Bali', ...] — pour sessions physiques
+    timezone VARCHAR(64) NULL,                             -- ex 'Europe/Paris'
+
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMP WITH TIME ZONE NULL
+);
+
+CREATE UNIQUE INDEX uniq_student_profile_user_id ON student_profile (user_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_student_profile_target_skills ON student_profile USING gin (target_skills);
+
 CREATE TABLE mira_class (
     id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
 
     -- Liens
-    application_id UUID NULL REFERENCES mentor_application(id) ON DELETE SET NULL,
-        -- Conserve la trace de la candidature d'origine après validation.
-        -- Devient NULL uniquement si la candidature est supprimée pour RGPD
-        -- (le ON DELETE SET NULL protège la mira_class qui survit).
+    application_id UUID NULL,
+        -- Référence logique mentor_application (Group A) — pas de FK (table absente de ce schéma hackathon).
     mentor_user_id UUID NOT NULL,
         -- ref Supabase auth.users.id du mentor — ne change jamais après création
         -- (= mentor_profile.user_id, pas mentor_profile.id)
@@ -241,10 +281,12 @@ CREATE TABLE student_enrolment_intent (
     submitted_at TIMESTAMP WITH TIME ZONE NULL,
     transmitted_at TIMESTAMP WITH TIME ZONE NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-
-    UNIQUE (profile_id, session_id) WHERE status != 'draft'
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX uniq_student_enrolment_intent_profile_session_active
+    ON student_enrolment_intent (profile_id, session_id)
+    WHERE status != 'draft';
 
 CREATE INDEX idx_student_enrolment_intent_profile_id ON student_enrolment_intent (profile_id, status);
 CREATE INDEX idx_student_enrolment_intent_session_id ON student_enrolment_intent (session_id);
@@ -357,48 +399,6 @@ CREATE TABLE student_path_regeneration_log (
 
 CREATE INDEX idx_path_regen_log_path_id ON student_path_regeneration_log (path_id, generated_at DESC);
 CREATE INDEX idx_path_regen_log_trigger ON student_path_regeneration_log (trigger_reason);
-
-CREATE TABLE student_profile (
-    id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
-    user_id UUID NOT NULL UNIQUE,                          -- ref Supabase auth.users.id
-
-    -- Identité
-    display_name VARCHAR(120) NOT NULL,
-    headline VARCHAR(255) NOT NULL DEFAULT '',             -- bio courte affichée en cohort
-    bio TEXT NOT NULL DEFAULT '',                          -- markdown
-    avatar_url VARCHAR(500) NULL,
-
-    -- Parcours
-    professional_journey JSONB NOT NULL DEFAULT '[]'::jsonb,
-        -- même schéma que mentor_profile.professional_journey
-
-    -- Liens sociaux (optionnels)
-    linkedin_url VARCHAR(255) NULL,
-    twitter_url VARCHAR(255) NULL,
-    website_url VARCHAR(255) NULL,
-
-    -- Objectifs apprentissage
-    target_skills JSONB NOT NULL DEFAULT '[]'::jsonb,
-        -- Schéma : [skill_id, skill_id, ...]
-    learning_horizon VARCHAR(16) NULL CHECK (learning_horizon IS NULL OR learning_horizon IN (
-        '3_months', '6_months', '1_year', '2_years'
-    )),
-    motivation TEXT NOT NULL DEFAULT '',                   -- "Pourquoi tu veux apprendre ?", utilisé par IA pour personnaliser parcours
-
-    -- Préférences
-    preferred_formats JSONB NOT NULL DEFAULT '[]'::jsonb,
-        -- ['physical', 'virtual', 'both']
-    preferred_destinations JSONB NOT NULL DEFAULT '[]'::jsonb,
-        -- ['Barcelona', 'Lisbon', 'Bali', ...] — pour sessions physiques
-    timezone VARCHAR(64) NULL,                             -- ex 'Europe/Paris'
-
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    deleted_at TIMESTAMP WITH TIME ZONE NULL
-);
-
-CREATE UNIQUE INDEX uniq_student_profile_user_id ON student_profile (user_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_student_profile_target_skills ON student_profile USING gin (target_skills);
 
 CREATE TABLE student_skill (
     id UUID NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
