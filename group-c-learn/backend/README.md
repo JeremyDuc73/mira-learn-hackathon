@@ -2,6 +2,8 @@
 
 Backend Python/FastAPI vanilla, structuré pour reprenabilité Claude Code post-hackathon.
 
+**Démarrage local en quelques commandes** → voir [`LOCAL.md`](./LOCAL.md).
+
 > Voir `../README.md` pour le contexte général et `../MIGRATION_GUIDE.md` pour les transformations cibles vers le backbone Hello Mira.
 
 ## Setup
@@ -34,7 +36,7 @@ Swagger UI sur `http://localhost:8000/docs`.
 |---|---|
 | `make install` | Installe Python deps depuis `requirements-dev.txt` |
 | `make dev` | Démarre uvicorn avec reload auto (port 8000) |
-| `make test` | Lance pytest avec coverage |
+| `make test` | Sans suite pytest pour l’instant (commande réservée) |
 | `make lint` | Vérifie le code (ruff + mypy) |
 | `make format` | Formate le code (ruff format + ruff check --fix) |
 | `make migrate` | Applique les migrations Alembic |
@@ -71,13 +73,10 @@ backend/
 │   │   └── example.py                   # schémas exemple
 │   └── services/                        # logique métier
 │       └── example_service.py           # service exemple
-├── tests/
-│   ├── conftest.py                      # fixtures pytest
-│   └── test_example.py                  # tests minimaux
 ├── requirements.txt                     # deps prod
-├── requirements-dev.txt                 # deps dev (test + lint)
-├── pytest.ini
+├── requirements-dev.txt                 # deps dev (lint + outils)
 ├── Makefile
+├── LOCAL.md                             # démarrage express en machine locale
 └── .env.example
 ```
 
@@ -136,7 +135,7 @@ make migrate
 
 ### 7. Tests
 
-Créer `tests/test_{entity}.py` (voir `tests/test_example.py`).
+Créer `tests/test_{entity}.py` lorsque vous réintroduisez une suite pytest au projet.
 
 ## Conventions non-négociables
 

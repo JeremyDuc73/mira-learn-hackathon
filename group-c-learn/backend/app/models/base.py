@@ -32,6 +32,7 @@ MIGRATION HINT (post-hackathon, CRITIQUE) :
 
     Voir `MIGRATION_GUIDE.md` section "Base SQLAlchemy → UnifiedModel".
 """
+
 import uuid
 from datetime import datetime
 

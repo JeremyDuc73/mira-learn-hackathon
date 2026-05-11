@@ -19,6 +19,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md` section "Configuration → BaseMicroservice".
 """
+
 from typing import Literal
 
 from pydantic import Field
@@ -61,19 +62,21 @@ class Settings(BaseSettings):
     OPENROUTER_DEFAULT_MODEL: str = "anthropic/claude-3.5-haiku"
 
     # CORS (en hackathon : on autorise tout localhost)
-    CORS_ALLOW_ORIGINS: list[str] = Field(default_factory=lambda: [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:8080",
-        "http://localhost:8081",
-    ])
+    CORS_ALLOW_ORIGINS: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:8080",
+            "http://localhost:8081",
+        ]
+    )
 
     def supabase_jwks_url(self) -> str:
         """Construit l'URL JWKS Supabase si pas fournie explicitement."""
         if self.SUPABASE_JWKS_URL:
             return self.SUPABASE_JWKS_URL
-        # Pattern Supabase standard : {SUPABASE_URL}/auth/v1/jwks
-        return f"{self.SUPABASE_URL.rstrip('/')}/auth/v1/jwks"
+        # Supabase (clés asymétriques) : endpoint documenté = .well-known (pas /auth/v1/jwks)
+        return f"{self.SUPABASE_URL.rstrip('/')}/auth/v1/.well-known/jwks.json"
 
 
 settings = Settings()  # type: ignore[call-arg]

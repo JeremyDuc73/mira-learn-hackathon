@@ -18,6 +18,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md`.
 """
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -48,7 +49,9 @@ async def create_example(
     **Réponse JSend** : `{status: success, data: ExampleRead}`.
     """
     instance = await example_service.create_example(db, body)
-    return success_response(data=ExampleRead.model_validate(instance).model_dump(mode="json"))
+    return success_response(
+        data=ExampleRead.model_validate(instance).model_dump(mode="json")
+    )
 
 
 @router.get("", summary="Lister les Examples")
@@ -71,7 +74,9 @@ async def list_examples(
     )
     return success_response(
         data={
-            "items": [ExampleRead.model_validate(i).model_dump(mode="json") for i in items],
+            "items": [
+                ExampleRead.model_validate(i).model_dump(mode="json") for i in items
+            ],
             "pagination": {
                 "limit": limit,
                 "offset": offset,
@@ -90,7 +95,9 @@ async def get_example(
 ) -> dict:
     """Récupère un Example par son id. 404 si introuvable ou soft-deleted."""
     instance = await example_service.get_example(db, example_id)
-    return success_response(data=ExampleRead.model_validate(instance).model_dump(mode="json"))
+    return success_response(
+        data=ExampleRead.model_validate(instance).model_dump(mode="json")
+    )
 
 
 @router.patch("/{example_id}", summary="Mettre à jour un Example")
@@ -102,10 +109,14 @@ async def update_example(
 ) -> dict:
     """Update partiel d'un Example. Seuls les champs fournis sont modifiés."""
     if not body.model_dump(exclude_unset=True):
-        return fail_response(data={"body": "no fields to update"}, message="Empty update body")
+        return fail_response(
+            data={"body": "no fields to update"}, message="Empty update body"
+        )
 
     instance = await example_service.update_example(db, example_id, body)
-    return success_response(data=ExampleRead.model_validate(instance).model_dump(mode="json"))
+    return success_response(
+        data=ExampleRead.model_validate(instance).model_dump(mode="json")
+    )
 
 
 @router.delete("/{example_id}", summary="Soft delete d'un Example")

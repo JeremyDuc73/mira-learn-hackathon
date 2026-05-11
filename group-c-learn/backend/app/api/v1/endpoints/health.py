@@ -7,6 +7,7 @@ MIGRATION HINT (post-hackathon) :
 
     Ce fichier sera supprimé post-hackathon.
 """
+
 from fastapi import APIRouter
 
 from app.core.config import settings

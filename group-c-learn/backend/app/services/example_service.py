@@ -17,6 +17,7 @@ MIGRATION HINT (post-hackathon) :
 
     Voir `MIGRATION_GUIDE.md`.
 """
+
 from typing import Sequence
 
 from sqlalchemy import select
@@ -64,7 +65,9 @@ async def list_examples(
         stmt = stmt.where(Example.status == status)
 
     # Count total avant pagination (pour la pagination cliente)
-    count_stmt = select(__import__("sqlalchemy").func.count()).select_from(stmt.subquery())
+    count_stmt = select(__import__("sqlalchemy").func.count()).select_from(
+        stmt.subquery()
+    )
     total = (await db.execute(count_stmt)).scalar() or 0
 
     # Page
