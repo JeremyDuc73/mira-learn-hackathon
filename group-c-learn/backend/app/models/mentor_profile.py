@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — mentor_profile (lecture catalogue Group C)."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 from decimal import Decimal
@@ -28,20 +29,20 @@ class MentorProfile(Base, TimestampMixin, SoftDeleteMixin):
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     headline: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    avatar_url: Mapped[str | None] = mapped_column(String(500))
-    cover_url: Mapped[str | None] = mapped_column(String(500))
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500))
+    cover_url: Mapped[Optional[str]] = mapped_column(String(500))
 
     professional_journey: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
 
-    linkedin_url: Mapped[str | None] = mapped_column(String(255))
-    instagram_url: Mapped[str | None] = mapped_column(String(255))
-    website_url: Mapped[str | None] = mapped_column(String(255))
+    linkedin_url: Mapped[Optional[str]] = mapped_column(String(255))
+    instagram_url: Mapped[Optional[str]] = mapped_column(String(255))
+    website_url: Mapped[Optional[str]] = mapped_column(String(255))
 
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
 
-    aggregate_rating: Mapped[Decimal | None] = mapped_column(Numeric(3, 2))
+    aggregate_rating: Mapped[Optional[Decimal]] = mapped_column(Numeric(3, 2))
     rating_count: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default="0"
     )

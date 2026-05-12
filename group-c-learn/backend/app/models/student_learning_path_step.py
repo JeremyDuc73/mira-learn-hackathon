@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — student_learning_path_step."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -39,17 +40,17 @@ class StudentLearningPathStep(Base, TimestampMixin):
         String(32), nullable=False, server_default="pending"
     )
 
-    started_at: Mapped[datetime | None] = mapped_column(
+    started_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    validated_at: Mapped[datetime | None] = mapped_column(
+    validated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    validated_via: Mapped[str | None] = mapped_column(String(32), nullable=True)
-    validated_via_class_session_id: Mapped[str | None] = mapped_column(
+    validated_via: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    validated_via_class_session_id: Mapped[Optional[str]] = mapped_column(
         UUID(as_uuid=False), nullable=True
     )
-    skipped_at: Mapped[datetime | None] = mapped_column(
+    skipped_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    skipped_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    skipped_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

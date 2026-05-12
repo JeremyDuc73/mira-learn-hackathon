@@ -3,6 +3,7 @@ Modèle SQLAlchemy — student_profile (Group C).
 """
 
 from __future__ import annotations
+from typing import Optional
 
 from sqlalchemy import String, Text, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -28,20 +29,20 @@ class StudentProfile(Base, TimestampMixin, SoftDeleteMixin):
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     headline: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     bio: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     professional_journey: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
 
-    linkedin_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    twitter_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    website_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    linkedin_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    twitter_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    website_url: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     target_skills: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
-    learning_horizon: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    learning_horizon: Mapped[Optional[str]] = mapped_column(String(16), nullable=True)
     motivation: Mapped[str] = mapped_column(Text, nullable=False, default="")
 
     preferred_formats: Mapped[list] = mapped_column(
@@ -50,9 +51,9 @@ class StudentProfile(Base, TimestampMixin, SoftDeleteMixin):
     preferred_destinations: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
-    timezone: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    timezone: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
-    current_country: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    current_country: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
 
     community_visibility: Mapped[str] = mapped_column(
         String(16),

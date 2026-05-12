@@ -1,6 +1,7 @@
 """Modèle — student_cv_import (0001 schema)."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -26,22 +27,22 @@ class StudentCvImport(Base, TimestampMixin, SoftDeleteMixin):
     )
 
     source_type: Mapped[str] = mapped_column(String(32), nullable=False)
-    file_url: Mapped[str | None] = mapped_column(String(500))
-    source_url: Mapped[str | None] = mapped_column(String(500))
-    raw_text: Mapped[str | None] = mapped_column(Text)
+    file_url: Mapped[Optional[str]] = mapped_column(String(500))
+    source_url: Mapped[Optional[str]] = mapped_column(String(500))
+    raw_text: Mapped[Optional[str]] = mapped_column(Text)
 
     status: Mapped[str] = mapped_column(
         String(32), nullable=False, server_default="uploaded"
     )
-    error_message: Mapped[str | None] = mapped_column(Text)
+    error_message: Mapped[Optional[str]] = mapped_column(Text)
 
-    extracted_experiences_raw: Mapped[list | None] = mapped_column(JSONB)
-    extracted_skills_raw: Mapped[list | None] = mapped_column(JSONB)
-    validated_experiences: Mapped[list | None] = mapped_column(JSONB)
-    validated_skills: Mapped[list | None] = mapped_column(JSONB)
+    extracted_experiences_raw: Mapped[Optional[list]] = mapped_column(JSONB)
+    extracted_skills_raw: Mapped[Optional[list]] = mapped_column(JSONB)
+    validated_experiences: Mapped[Optional[list]] = mapped_column(JSONB)
+    validated_skills: Mapped[Optional[list]] = mapped_column(JSONB)
 
-    extracted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    extracted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
-    validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    llm_model_used: Mapped[str | None] = mapped_column(String(64))
-    llm_tokens_consumed: Mapped[int | None] = mapped_column(Integer)
+    validated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    llm_model_used: Mapped[Optional[str]] = mapped_column(String(64))
+    llm_tokens_consumed: Mapped[Optional[int]] = mapped_column(Integer)

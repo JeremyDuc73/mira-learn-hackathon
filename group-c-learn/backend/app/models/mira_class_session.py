@@ -1,6 +1,7 @@
 """Modèle — mira_class_session (sessions inscription démo groupe C)."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -25,7 +26,7 @@ class MiraClassSession(Base):
         nullable=False,
     )
     title: Mapped[str] = mapped_column(String(200), nullable=False, default="")
-    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    starts_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     spots_available: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     format_envisaged: Mapped[str] = mapped_column(
         String(16), nullable=False, default="both"

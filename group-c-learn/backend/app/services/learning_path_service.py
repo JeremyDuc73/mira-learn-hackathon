@@ -257,19 +257,40 @@ async def _run_llm_and_persist_steps(
 
     tokens = 0
     latency: int | None = None
-    try:
-        raw = await llm_client.complete(
-            messages,
-            model=model,
-            temperature=0.35,
-            max_tokens=6000,
-            response_format={"type": "json_object"},
-        )
-        latency = int((time.monotonic() - t0) * 1000)
-        usage = raw.get("usage") or {}
-        tokens = int(usage.get("total_tokens") or 0)
 
-        parsed = parse_llm_path_payload(raw["content"])
+    _DEMO_KEY_SENTINEL = "REPLACE_WITH"
+    _use_mock = _DEMO_KEY_SENTINEL in settings.OPENROUTER_API_KEY
+
+    try:
+        if _use_mock:
+            # No real API key — build a deterministic mock payload from the catalog
+            mock_steps = [
+                LLMStepRow(
+                    position=i + 1,
+                    skill_id=sid,
+                    justification="Étape recommandée par Mira AI pour atteindre ton objectif.",
+                    recommended_class_ids=_classes_teaching_skill(published_classes, sid)[:3],
+                    estimated_duration_hours=12,
+                )
+                for i, sid in enumerate(targets)
+            ]
+            parsed = LLMPathPayload(
+                steps=mock_steps,
+                total_estimated_duration_hours=len(mock_steps) * 12,
+            )
+        else:
+            raw = await llm_client.complete(
+                messages,
+                model=model,
+                temperature=0.35,
+                max_tokens=6000,
+                response_format={"type": "json_object"},
+            )
+            latency = int((time.monotonic() - t0) * 1000)
+            usage = raw.get("usage") or {}
+            tokens = int(usage.get("total_tokens") or 0)
+            parsed = parse_llm_path_payload(raw["content"])
+
         steps = _normalize_steps(parsed, targets, published_classes)
         total_h = parsed.total_estimated_duration_hours
         if total_h is None or total_h <= 0:
@@ -294,7 +315,7 @@ async def _run_llm_and_persist_steps(
                     recommended_class_ids=s.recommended_class_ids,
                     justification=s.justification,
                     estimated_duration_hours=s.estimated_duration_hours,
-                    status="pending",
+                    status="in_progress" if s.position == 1 else "pending",
                 )
             )
 

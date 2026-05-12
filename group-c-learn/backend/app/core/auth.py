@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Auth middleware : valide JWT Supabase via JWKS (asymétrique : RS256 / ES256, etc.).
 
@@ -123,6 +125,15 @@ class AuthenticatedUser:
         return f"AuthenticatedUser(user_id={self.user_id!r}, role={self.role!r})"
 
 
+_DEMO_USERS: dict[str, AuthenticatedUser] = {
+    "demo-anna": AuthenticatedUser(
+        user_id="b4278adc-15cc-4585-a6fa-4ddb262c24e8",
+        email="anna.lopez@hackathon.test",
+        role="nomad",
+    ),
+}
+
+
 async def require_auth(
     authorization: str | None = Header(default=None),
 ) -> AuthenticatedUser:
@@ -145,7 +156,12 @@ async def require_auth(
             detail="Missing or invalid Authorization header",
         )
 
-    token = authorization[len("Bearer ") :]
+    token = authorization[len("Bearer "):]
+
+    # Bypass démo hackathon
+    if token in _DEMO_USERS:
+        return _DEMO_USERS[token]
+
     payload = await _decode_jwt(token)
 
     user_id = payload.get("sub")

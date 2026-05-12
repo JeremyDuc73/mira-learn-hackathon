@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — student_path_regeneration_log."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -41,14 +42,14 @@ class StudentPathRegenerationLog(Base):
 
     llm_model_used: Mapped[str] = mapped_column(String(64), nullable=False)
     llm_tokens_consumed: Mapped[int] = mapped_column(Integer, nullable=False)
-    llm_cost_estimated_cents: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    llm_cost_estimated_cents: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
     generation_prompt_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    generation_latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    generation_latency_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     generation_success: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("TRUE")
     )
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     generated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

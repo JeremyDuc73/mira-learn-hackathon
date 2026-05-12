@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — mira_class (lecture catalogue Group C)."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -20,11 +21,11 @@ class MiraClass(Base, TimestampMixin, SoftDeleteMixin):
         server_default=text("uuid_generate_v4()"),
     )
 
-    application_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
+    application_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False))
     mentor_user_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False)
 
     title: Mapped[str] = mapped_column(String(200), nullable=False)
-    slug: Mapped[str | None] = mapped_column(String(130), nullable=True)
+    slug: Mapped[Optional[str]] = mapped_column(String(130), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     skills_taught: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
@@ -47,7 +48,7 @@ class MiraClass(Base, TimestampMixin, SoftDeleteMixin):
     delivery_language: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default="fr"
     )
-    rythm_pattern: Mapped[str | None] = mapped_column(String(32))
+    rythm_pattern: Mapped[Optional[str]] = mapped_column(String(32))
     target_cities: Mapped[list] = mapped_column(
         JSONB, nullable=False, server_default=text("'[]'::jsonb")
     )
@@ -62,14 +63,14 @@ class MiraClass(Base, TimestampMixin, SoftDeleteMixin):
     status: Mapped[str] = mapped_column(
         String(32), nullable=False, server_default="draft"
     )
-    rejection_reason: Mapped[str | None] = mapped_column(Text)
+    rejection_reason: Mapped[Optional[str]] = mapped_column(Text)
 
     ai_assisted: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("FALSE")
     )
-    source_suggestion_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
+    source_suggestion_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False))
 
-    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    submitted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    validated_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    archived_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))

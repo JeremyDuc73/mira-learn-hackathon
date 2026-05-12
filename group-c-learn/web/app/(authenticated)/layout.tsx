@@ -6,7 +6,6 @@ import Link from "next/link";
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
-import { supabase } from "@/lib/supabase";
 
 /**
  * Layout du groupe de routes `(authenticated)`.
@@ -29,8 +28,8 @@ export default function AuthenticatedLayout({
     }
   }, [loading, user, router]);
 
-  async function handleSignOut() {
-    await supabase.auth.signOut();
+  function handleSignOut() {
+    localStorage.removeItem("demo_logged_in");
     router.push("/login");
   }
 

@@ -18,6 +18,8 @@ MIGRATION HINT (post-hackathon) :
     Voir `MIGRATION_GUIDE.md` section "JSend responses".
 """
 
+from __future__ import annotations
+
 from typing import Any
 
 

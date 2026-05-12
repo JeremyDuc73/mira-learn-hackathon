@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — student_skill."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -29,7 +30,7 @@ class StudentSkill(Base, TimestampMixin):
     validated: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     source: Mapped[str] = mapped_column(String(32), nullable=False)
 
-    validated_at: Mapped[datetime | None] = mapped_column(
+    validated_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    validation_evidence: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    validation_evidence: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)

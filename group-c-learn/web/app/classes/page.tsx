@@ -53,7 +53,10 @@ export default function CataloguePage() {
     Promise.all([fetchClasses(), fetchSkills()])
       .then(([classData, skillData]) => {
         const map = buildSkillMap(skillData.items);
-        setClasses(classData.items.map((c) => toDisplay(c, map)));
+        const displayed = classData.items.map((c) => toDisplay(c, map));
+        setClasses(displayed);
+        const actualMax = Math.max(...displayed.map((c) => c.priceEur), 0);
+        setMaxPrice(actualMax);
       })
       .catch(console.error)
       .finally(() => setLoading(false));

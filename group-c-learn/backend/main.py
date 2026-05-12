@@ -50,11 +50,11 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json",
     )
 
-    # CORS (hackathon : permissif, sera restreint en V1 prod via edge-gateway)
+    # CORS (hackathon : tout autorisé, restreindre en prod)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.CORS_ALLOW_ORIGINS,
-        allow_credentials=True,
+        allow_origins=["*"],
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )

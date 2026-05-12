@@ -3,19 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 
-/**
- * Page de login email/password.
- *
- * Le pattern hackathon utilise Supabase Auth via localStorage (cohérent book-web).
- *
- * MIGRATION HINT (post-hackathon) :
- *   Le login en prod Hello Mira passe par `idp-front` (Identity Provider central)
- *   qui retourne un `redirect_token` consommé par auth-api `/v1/auth/exchange`.
- *   Pas de login email/password direct dans les apps. Voir `fronts/idp-front/`.
- */
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -28,15 +17,18 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
+    // Démo hackathon : login Anna Lopez sans Supabase
+    if (
+      email === "anna.lopez@hackathon.test" &&
+      password === "Hackathon2026!"
+    ) {
+      localStorage.setItem("demo_logged_in", "true");
+      router.push("/me/path");
       return;
     }
 
-    router.push("/me");
+    setError("Compte introuvable. Utilise les identifiants Anna Lopez ci-dessous.");
+    setLoading(false);
   }
 
   return (

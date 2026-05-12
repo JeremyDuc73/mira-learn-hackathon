@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — student_enrolment_intent (phase 5)."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 
@@ -34,16 +35,16 @@ class StudentEnrolmentIntent(Base, TimestampMixin):
     )
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft")
 
-    source_learning_path_id: Mapped[str | None] = mapped_column(
+    source_learning_path_id: Mapped[Optional[str]] = mapped_column(
         UUID(as_uuid=False), nullable=True
     )
-    source_learning_path_step_id: Mapped[str | None] = mapped_column(
+    source_learning_path_step_id: Mapped[Optional[str]] = mapped_column(
         UUID(as_uuid=False), nullable=True
     )
 
-    submitted_at: Mapped[datetime | None] = mapped_column(
+    submitted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    transmitted_at: Mapped[datetime | None] = mapped_column(
+    transmitted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )

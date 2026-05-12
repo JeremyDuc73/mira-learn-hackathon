@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
-import { getClassBySlug, MENTORS } from "@/lib/mock-data";
+import { fetchClassBySlug, formatSessionDate, type ApiClassDetail } from "@/lib/api";
 
 const LEVELS = [
   { id: "debutant", label: "Débutant complet" },
@@ -23,16 +23,34 @@ const AVAILABILITIES = [
 
 export default function ApplyPage() {
   const params = useParams<{ slug: string }>();
-  const klass = getClassBySlug(params.slug);
-  const mentor = klass ? MENTORS[klass.mentorId] : null;
+  const [klass, setKlass] = useState<ApiClassDetail | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const [session, setSession] = useState(klass?.sessions[0]?.id ?? "");
+  const [session, setSession] = useState("");
   const [level, setLevel] = useState("quelques-bases");
   const [goal, setGoal] = useState("");
   const [avail, setAvail] = useState({ soir: true, weekend: false, semaine: false });
   const [submitted, setSubmitted] = useState(false);
 
-  if (!klass || !mentor) {
+  useEffect(() => {
+    fetchClassBySlug(params.slug)
+      .then((data) => {
+        setKlass(data);
+        if (data.sessions.length > 0) setSession(data.sessions[0].id);
+      })
+      .catch(() => setKlass(null))
+      .finally(() => setLoading(false));
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-muted-foreground">Chargement…</p>
+      </div>
+    );
+  }
+
+  if (!klass) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-muted-foreground">Class introuvable.</p>
@@ -41,6 +59,7 @@ export default function ApplyPage() {
   }
 
   const goalValid = goal.length >= 50 && goal.length <= 500;
+  const mentorFirstName = klass.mentor.display_name.split(" ")[0];
 
   if (submitted) {
     return (
@@ -51,7 +70,7 @@ export default function ApplyPage() {
           </div>
           <h2 className="font-serif text-3xl font-bold leading-tight text-foreground">
             Candidature envoyée à{" "}
-            <span className="italic text-primary">{mentor.name.split(" ")[0]}.</span>
+            <span className="italic text-primary">{mentorFirstName}.</span>
           </h2>
           <p className="mt-5 text-base leading-relaxed text-muted-foreground">
             Tu recevras une réponse par email sous 48 h. En attendant, tu peux explorer le reste du catalogue ou bosser ton parcours.
@@ -70,7 +89,7 @@ export default function ApplyPage() {
       <header className="sticky top-0 z-10 border-b border-border bg-background px-6 py-4">
         <nav className="mx-auto flex max-w-6xl items-center justify-between">
           <Link href="/" className="font-serif text-xl font-bold text-primary">Mira Learn</Link>
-          <Link href={`/classes/${klass.slug}`} className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href={`/classes/${params.slug}`} className="text-sm text-muted-foreground hover:text-foreground">
             ← Class : {klass.title}
           </Link>
         </nav>
@@ -82,50 +101,58 @@ export default function ApplyPage() {
           <span className="italic text-primary">Mira Class.</span>
         </h1>
         <div className="mt-4 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-beige-deep text-xs font-bold text-foreground">
-            {mentor.name.slice(0, 2).toUpperCase()}
-          </div>
+          {klass.mentor.avatar_url ? (
+            <img
+              src={klass.mentor.avatar_url}
+              alt={klass.mentor.display_name}
+              className="h-9 w-9 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-beige-deep text-xs font-bold text-foreground">
+              {klass.mentor.display_name.slice(0, 2).toUpperCase()}
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{mentor.name.split(" ")[0]}</span>{" "}
+            <span className="font-semibold text-foreground">{mentorFirstName}</span>{" "}
             examinera ta candidature et te répondra sous 48 h.
           </p>
         </div>
 
         <div className="mt-12 space-y-9">
           {/* Session */}
-          <div>
-            <h2 className="mb-1 text-base font-semibold text-foreground">Session souhaitée</h2>
-            <p className="mb-4 text-sm text-muted-foreground">Tu peux candidater à une seule session à la fois.</p>
-            <div className="space-y-3">
-              {klass.sessions.map((s) => (
-                <label
-                  key={s.id}
-                  className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-5 transition-colors ${
-                    session === s.id ? "border-foreground bg-background" : "border-border bg-card"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="session"
-                    checked={session === s.id}
-                    onChange={() => setSession(s.id)}
-                    className="hidden"
-                  />
-                  <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${session === s.id ? "border-primary" : "border-border"}`}>
-                    {session === s.id && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">
-                      {s.location}
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {s.dates} · {s.seats - s.enrolled} places dispo
-                    </p>
-                  </div>
-                </label>
-              ))}
+          {klass.sessions.length > 0 && (
+            <div>
+              <h2 className="mb-1 text-base font-semibold text-foreground">Session souhaitée</h2>
+              <p className="mb-4 text-sm text-muted-foreground">Tu peux candidater à une seule session à la fois.</p>
+              <div className="space-y-3">
+                {klass.sessions.map((s) => (
+                  <label
+                    key={s.id}
+                    className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-5 transition-colors ${
+                      session === s.id ? "border-foreground bg-background" : "border-border bg-card"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="session"
+                      checked={session === s.id}
+                      onChange={() => setSession(s.id)}
+                      className="hidden"
+                    />
+                    <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${session === s.id ? "border-primary" : "border-border"}`}>
+                      {session === s.id && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground">{s.title}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {formatSessionDate(s.starts_at)} · {s.spots_available} places dispo
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Niveau */}
           <div>
@@ -151,7 +178,7 @@ export default function ApplyPage() {
           {/* Objectif */}
           <div>
             <h2 className="mb-1 text-base font-semibold text-foreground">Ton objectif concret</h2>
-            <p className="mb-3 text-sm text-muted-foreground">200-500 caractères. Sois spécifique : un projet, un timing, un montant.</p>
+            <p className="mb-3 text-sm text-muted-foreground">50-500 caractères. Sois spécifique : un projet, un timing, un montant.</p>
             <textarea
               value={goal}
               onChange={(e) => setGoal(e.target.value.slice(0, 500))}
@@ -179,7 +206,7 @@ export default function ApplyPage() {
                     avail[o.id] ? "border-foreground bg-background" : "border-border bg-card"
                   }`}
                 >
-                  <div className={`flex h-4.5 w-4.5 items-center justify-center rounded border-2 ${avail[o.id] ? "border-primary bg-primary" : "border-border"}`}>
+                  <div className={`flex h-4 w-4 items-center justify-center rounded border-2 ${avail[o.id] ? "border-primary bg-primary" : "border-border"}`}>
                     {avail[o.id] && <div className="h-2 w-2 rounded-full bg-white" />}
                   </div>
                   {o.label}
@@ -196,13 +223,39 @@ export default function ApplyPage() {
         </div>
 
         <div className="mt-12 flex items-center justify-between gap-4 border-t border-border pt-8">
-          <Link href={`/classes/${klass.slug}`}>
+          <Link href={`/classes/${params.slug}`}>
             <Button variant="ghost">Annuler</Button>
           </Link>
           <Button
             variant="primary"
             disabled={!goalValid}
-            onClick={() => setSubmitted(true)}
+            onClick={async () => {
+              const API = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000") + "/v1";
+              const headers = {
+                "Content-Type": "application/json",
+                Authorization: "Bearer demo-anna",
+              };
+              try {
+                const res = await fetch(`${API}/students/me/enrolment-intents`, {
+                  method: "POST",
+                  headers,
+                  body: JSON.stringify({
+                    session_id: session,
+                    class_id: klass.id,
+                    application_data: { level, goal, availability: avail },
+                  }),
+                });
+                const json = await res.json();
+                const intentId = json.data?.id;
+                if (intentId) {
+                  await fetch(`${API}/students/me/enrolment-intents/${intentId}/submit`, {
+                    method: "POST",
+                    headers,
+                  });
+                }
+              } catch (_) {}
+              setSubmitted(true);
+            }}
             className="px-8 text-base"
           >
             Soumettre ma candidature →

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 """
 Base SQLAlchemy declarative + mixins audit.
 
@@ -35,6 +38,7 @@ MIGRATION HINT (post-hackathon, CRITIQUE) :
 
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -78,7 +82,7 @@ class TimestampMixin:
 class SoftDeleteMixin:
     """Mixin : deleted_at nullable (soft delete pattern Hello Mira)."""
 
-    deleted_at: Mapped[datetime | None] = mapped_column(
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
         default=None,

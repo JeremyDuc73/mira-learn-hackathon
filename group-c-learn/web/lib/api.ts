@@ -121,3 +121,94 @@ export async function fetchSkills(): Promise<{ items: ApiSkill[] }> {
 export async function fetchCommunityLearners(): Promise<{ items: ApiLearner[] }> {
   return apiFetch("/community/learners?limit=50");
 }
+
+// ─── Types authentifiés ───────────────────────────────────────────────────────
+
+export interface ApiProfile {
+  id: string;
+  display_name: string;
+  headline: string;
+  bio: string;
+  avatar_url: string | null;
+  current_country: string | null;
+  community_visibility: "public" | "private";
+  preferred_destinations: string[];
+  target_skills: string[];
+  learning_horizon: string | null;
+}
+
+export interface ApiStep {
+  id: string;
+  position: number;
+  skill_id: string;
+  recommended_class_ids: string[];
+  justification: string;
+  estimated_duration_hours: number;
+  status: "pending" | "in_progress" | "validated" | "skipped";
+}
+
+export interface ApiLearningPath {
+  id: string;
+  name: string;
+  target_skills: string[];
+  target_horizon: string;
+  total_steps: number;
+  estimated_duration_hours: number;
+  completion_pct: number;
+  status: "active" | "completed" | "abandoned";
+  steps?: ApiStep[];
+}
+
+export interface ApiEnrolmentIntent {
+  id: string;
+  class_id: string;
+  session_id: string;
+  status: string;
+  submitted_at: string | null;
+  application_data: Record<string, unknown>;
+}
+
+// ─── Fetchers authentifiés (demo-anna) ───────────────────────────────────────
+
+const DEMO_TOKEN = "demo-anna";
+
+async function apiAuthFetch<T>(path: string, opts?: RequestInit): Promise<T> {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${DEMO_TOKEN}`,
+      ...((opts?.headers as object) ?? {}),
+    },
+  });
+  if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
+  const json = await res.json();
+  return json.data as T;
+}
+
+export async function fetchMyProfile(): Promise<ApiProfile> {
+  return apiAuthFetch("/students/me");
+}
+
+export async function updateMyProfile(data: Partial<ApiProfile>): Promise<ApiProfile> {
+  return apiAuthFetch("/students/me", {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchMyEnrolmentIntents(): Promise<{ items: ApiEnrolmentIntent[] }> {
+  return apiAuthFetch("/students/me/enrolment-intents");
+}
+
+export async function fetchMyActivePath(): Promise<ApiLearningPath | null> {
+  const data = await apiAuthFetch<{ items: ApiLearningPath[] }>("/students/me/learning-paths");
+  const active = data.items.find((p) => p.status === "active") ?? null;
+  if (!active) return null;
+  const detail = await apiAuthFetch<ApiLearningPath>(`/students/me/learning-paths/${active.id}`);
+  return detail;
+}
+
+export async function fetchClassById(id: string): Promise<ApiClassDetail> {
+  return apiFetch(`/classes/${id}`);
+}

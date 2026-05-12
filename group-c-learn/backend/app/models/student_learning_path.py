@@ -1,6 +1,7 @@
 """Modèle SQLAlchemy — student_learning_path."""
 
 from __future__ import annotations
+from typing import Optional
 
 from datetime import datetime
 from decimal import Decimal
@@ -46,15 +47,15 @@ class StudentLearningPath(Base, TimestampMixin, SoftDeleteMixin):
         DateTime(timezone=True), nullable=False
     )
     llm_model_used: Mapped[str] = mapped_column(String(64), nullable=False)
-    llm_tokens_consumed: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    llm_tokens_consumed: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
-    started_at: Mapped[datetime | None] = mapped_column(
+    started_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    completed_at: Mapped[datetime | None] = mapped_column(
+    completed_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    abandoned_at: Mapped[datetime | None] = mapped_column(
+    abandoned_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    abandoned_reason: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    abandoned_reason: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
