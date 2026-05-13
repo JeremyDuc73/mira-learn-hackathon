@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Landing /", () => {
   test("affiche le titre Mira Learn", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Mira Learn")).toBeVisible();
+    await expect(page.getByText("Mira Learn").first()).toBeVisible();
   });
 
   test("lien Catalogue pointe vers /classes", async ({ page }) => {

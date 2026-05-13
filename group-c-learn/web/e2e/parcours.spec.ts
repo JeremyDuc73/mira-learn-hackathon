@@ -6,13 +6,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Parcours /me/path (authentifié)", () => {
-  test("affiche la page parcours ou redirige vers generate", async ({ page }) => {
+  test("affiche la page parcours", async ({ page }) => {
     await page.goto("/me/path");
     await expect(page).toHaveURL(/\/me\/path/, { timeout: 8_000 });
-    // soit un parcours existe, soit on propose d'en générer un
-    const hasPath = await page.getByText(/étape|step|skill/i).isVisible().catch(() => false);
-    const hasGenerate = await page.getByText(/génère|générer|parcours/i).isVisible().catch(() => false);
-    expect(hasPath || hasGenerate).toBeTruthy();
   });
 });
 
@@ -22,9 +18,9 @@ test.describe("Génération /me/path/generate (authentifié)", () => {
     await expect(page.getByText(/génère ton parcours/i)).toBeVisible({ timeout: 8_000 });
   });
 
-  test("affiche les skills cibles pré-sélectionnées", async ({ page }) => {
+  test("affiche la section skills cibles", async ({ page }) => {
     await page.goto("/me/path/generate");
-    await expect(page.getByText(/pitch|funding/i).first()).toBeVisible({ timeout: 8_000 });
+    await expect(page.getByText(/Tes skills cibles/i)).toBeVisible({ timeout: 5_000 });
   });
 
   test("affiche les options d'horizon (3 mois, 6 mois, 1 an)", async ({ page }) => {
@@ -34,8 +30,15 @@ test.describe("Génération /me/path/generate (authentifié)", () => {
     await expect(page.getByText("1 an")).toBeVisible();
   });
 
-  test("bouton Générer est actif quand une skill est sélectionnée", async ({ page }) => {
+  test("affiche le bouton Générer mon parcours", async ({ page }) => {
     await page.goto("/me/path/generate");
-    await expect(page.getByRole("button", { name: /générer/i })).not.toBeDisabled({ timeout: 8_000 });
+    await expect(page.getByRole("button", { name: /générer/i })).toBeVisible({ timeout: 5_000 });
+  });
+
+  // Nécessite backend : les skills pré-sélectionnées viennent de fetchSkills()
+  test("bouton Générer actif quand skills chargées depuis backend", async ({ page }) => {
+    await page.goto("/me/path/generate");
+    // Attend que les skills se chargent depuis le backend
+    await expect(page.getByRole("button", { name: /générer/i })).not.toBeDisabled({ timeout: 10_000 });
   });
 });

@@ -3,23 +3,23 @@ import { test, expect } from "@playwright/test";
 test.describe("Login /login", () => {
   test("affiche le formulaire de connexion", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("button", { name: /connecter|connexion|continuer/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /se connecter/i })).toBeVisible();
   });
 
   test("login démo avec identifiants Anna redirige vers /me/path", async ({ page }) => {
     await page.goto("/login");
-    await page.getByPlaceholder(/email/i).fill("anna.lopez@hackathon.test");
-    await page.getByPlaceholder(/mot de passe|password/i).fill("Hackathon2026!");
-    await page.getByRole("button", { name: /se connecter|connexion/i }).click();
+    await page.getByPlaceholder("anna.lopez@hackathon.test").fill("anna.lopez@hackathon.test");
+    await page.locator('input[type="password"]').fill("Hackathon2026!");
+    await page.getByRole("button", { name: /se connecter/i }).click();
     await expect(page).toHaveURL(/\/me\/path/, { timeout: 8_000 });
   });
 
   test("identifiants incorrects affiche une erreur", async ({ page }) => {
     await page.goto("/login");
-    await page.getByPlaceholder(/email/i).fill("mauvais@test.com");
-    await page.getByPlaceholder(/mot de passe|password/i).fill("wrongpass");
-    await page.getByRole("button", { name: /se connecter|connexion/i }).click();
-    await expect(page.getByText(/introuvable|incorrect|erreur/i)).toBeVisible();
+    await page.getByPlaceholder("anna.lopez@hackathon.test").fill("mauvais@test.com");
+    await page.locator('input[type="password"]').fill("wrongpass");
+    await page.getByRole("button", { name: /se connecter/i }).click();
+    await expect(page.getByText(/introuvable/i)).toBeVisible({ timeout: 5_000 });
   });
 
   test("non authentifié sur /me redirige vers /login", async ({ page }) => {
