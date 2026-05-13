@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
-
-// Ces tests nécessitent le backend sur http://localhost:8000
+import { isBackendUp } from "./helpers";
 
 test.describe("Catalogue /classes", () => {
   test.beforeEach(async ({ page }) => {
@@ -12,6 +11,7 @@ test.describe("Catalogue /classes", () => {
   });
 
   test("charge et affiche des cards de classes", async ({ page }) => {
+    test.skip(!(await isBackendUp()), "Backend non disponible");
     await expect(page.getByText("Chargement des classes...")).not.toBeVisible({ timeout: 10_000 });
     const cards = page.locator("a[href^='/classes/']");
     await expect(cards.first()).toBeVisible({ timeout: 10_000 });
@@ -19,6 +19,7 @@ test.describe("Catalogue /classes", () => {
   });
 
   test("filtre par format Virtuel réduit les résultats", async ({ page }) => {
+    test.skip(!(await isBackendUp()), "Backend non disponible");
     await expect(page.getByText("Chargement des classes...")).not.toBeVisible({ timeout: 10_000 });
     const totalBefore = await page.locator("a[href^='/classes/']").count();
     await page.getByRole("button", { name: "Virtuel" }).first().click();
@@ -27,6 +28,7 @@ test.describe("Catalogue /classes", () => {
   });
 
   test("reset réinitialise les filtres", async ({ page }) => {
+    test.skip(!(await isBackendUp()), "Backend non disponible");
     await expect(page.getByText("Chargement des classes...")).not.toBeVisible({ timeout: 10_000 });
     const totalBefore = await page.locator("a[href^='/classes/']").count();
     await page.getByRole("button", { name: "Virtuel" }).first().click();

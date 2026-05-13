@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { isBackendUp } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/login");
@@ -35,10 +36,9 @@ test.describe("Génération /me/path/generate (authentifié)", () => {
     await expect(page.getByRole("button", { name: /générer/i })).toBeVisible({ timeout: 5_000 });
   });
 
-  // Nécessite backend : les skills pré-sélectionnées viennent de fetchSkills()
   test("bouton Générer actif quand skills chargées depuis backend", async ({ page }) => {
+    test.skip(!(await isBackendUp()), "Backend non disponible");
     await page.goto("/me/path/generate");
-    // Attend que les skills se chargent depuis le backend
     await expect(page.getByRole("button", { name: /générer/i })).not.toBeDisabled({ timeout: 10_000 });
   });
 });
