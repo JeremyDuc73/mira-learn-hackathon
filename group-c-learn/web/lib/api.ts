@@ -17,6 +17,7 @@ export interface ApiClassItem {
   skills_taught: string[];
   total_hours: number;
   format_envisaged: "physical" | "virtual" | "both";
+  delivery_language: string;
   recommended_price_per_hour_collective_cents: number;
   mentor_display_name: string;
   mentor_avatar_url: string | null;

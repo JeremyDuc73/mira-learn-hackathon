@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -245,8 +245,11 @@ function GeneratingStateWithCall({
     return () => ts.forEach(clearTimeout);
   }, []);
 
+  const fired = useRef(false);
   useEffect(() => {
-    let cancelled = false;
+    if (fired.current) return;
+    fired.current = true;
+
     const minDelay = new Promise<void>((resolve) => setTimeout(resolve, 5000));
     const apiCall = fetch(`${API}/students/me/learning-paths`, {
       method: "POST",
@@ -261,11 +264,7 @@ function GeneratingStateWithCall({
       }),
     }).catch(() => null);
 
-    Promise.all([minDelay, apiCall]).then(() => {
-      if (!cancelled) onDone();
-    });
-
-    return () => { cancelled = true; };
+    Promise.all([minDelay, apiCall]).then(() => onDone());
   }, []);
 
   const SKELETON_STEPS = [

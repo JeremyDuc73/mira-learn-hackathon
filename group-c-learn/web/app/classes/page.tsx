@@ -16,11 +16,14 @@ import {
 
 const ALL_FORMATS = ["Physique", "Virtuel", "Hybride"] as const;
 
+const LANG_LABELS: Record<string, string> = { fr: "Français", en: "English", es: "Español" };
+
 interface DisplayClass {
   slug: string;
   title: string;
   mentorName: string;
   format: string;
+  language: string;
   totalHours: number;
   skills: string[];
   priceEur: number;
@@ -33,6 +36,7 @@ function toDisplay(c: ApiClassItem, skillMap: Map<string, string>): DisplayClass
     title: c.title,
     mentorName: c.mentor_display_name,
     format: formatLabel(c.format_envisaged),
+    language: c.delivery_language ?? "fr",
     totalHours: c.total_hours,
     skills: resolveSkills(c.skills_taught, skillMap),
     priceEur: computePrice(c.recommended_price_per_hour_collective_cents, c.total_hours),
@@ -46,6 +50,7 @@ export default function CataloguePage() {
 
   const [skillFilter, setSkillFilter] = useState<string[]>([]);
   const [formatFilter, setFormatFilter] = useState<string[]>([]);
+  const [langFilter, setLangFilter] = useState<string[]>([]);
   const [maxPrice, setMaxPrice] = useState(500);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -68,6 +73,12 @@ export default function CataloguePage() {
     return [...set];
   }, [classes]);
 
+  const allLanguages = useMemo(() => {
+    const set = new Set<string>();
+    classes.forEach((c) => set.add(c.language));
+    return [...set];
+  }, [classes]);
+
   const maxPossiblePrice = useMemo(() => {
     if (classes.length === 0) return 500;
     return Math.max(...classes.map((c) => c.priceEur), 500);
@@ -76,6 +87,7 @@ export default function CataloguePage() {
   const filtered = classes.filter((c) => {
     if (skillFilter.length && !skillFilter.some((s) => c.skills.includes(s))) return false;
     if (formatFilter.length && !formatFilter.includes(c.format)) return false;
+    if (langFilter.length && !langFilter.includes(c.language)) return false;
     if (c.priceEur > maxPrice) return false;
     return true;
   });
@@ -86,14 +98,18 @@ export default function CataloguePage() {
   function toggleFormat(f: string) {
     setFormatFilter((prev) => prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]);
   }
+  function toggleLang(l: string) {
+    setLangFilter((prev) => prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]);
+  }
   function reset() {
     setSkillFilter([]);
     setFormatFilter([]);
+    setLangFilter([]);
     setMaxPrice(maxPossiblePrice);
     setFiltersOpen(false);
   }
 
-  const activeFilters = skillFilter.length + formatFilter.length + (maxPrice < maxPossiblePrice ? 1 : 0);
+  const activeFilters = skillFilter.length + formatFilter.length + langFilter.length + (maxPrice < maxPossiblePrice ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,6 +179,26 @@ export default function CataloguePage() {
               </button>
             ))}
           </div>
+          {allLanguages.length > 1 && (
+            <>
+              <div className="h-4 w-px bg-border" />
+              <div className="flex gap-2">
+                {allLanguages.map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => toggleLang(l)}
+                    className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                      langFilter.includes(l)
+                        ? "border-foreground bg-foreground text-primary-foreground"
+                        : "border-border bg-card text-foreground hover:bg-beige-deep"
+                    }`}
+                  >
+                    {LANG_LABELS[l] ?? l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1">
             <span className="whitespace-nowrap text-xs font-medium text-foreground">Prix max</span>
@@ -248,6 +284,26 @@ export default function CataloguePage() {
                   ))}
                 </div>
               </div>
+              {allLanguages.length > 1 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Langue</p>
+                  <div className="flex gap-2">
+                    {allLanguages.map((l) => (
+                      <button
+                        key={l}
+                        onClick={() => toggleLang(l)}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                          langFilter.includes(l)
+                            ? "border-foreground bg-foreground text-primary-foreground"
+                            : "border-border bg-card text-foreground"
+                        }`}
+                      >
+                        {LANG_LABELS[l] ?? l.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Prix max : <span className="font-bold text-foreground">{maxPrice} €</span>
